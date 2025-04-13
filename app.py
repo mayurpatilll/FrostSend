@@ -204,7 +204,8 @@ def oauth2callback():
     if not state:
         # print("--- DEBUG: State missing from session! ---") # Removed
         flash("OAuth state missing from session. Please try connecting again.", "error")
-        return redirect(url_for('index'))
+        # Explicitly redirect to root URL in production
+        return redirect(PROD_URL or url_for('index'))
 
     try:
         # print("--- DEBUG: Creating Flow object... ---") # Removed
