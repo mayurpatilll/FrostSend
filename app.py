@@ -27,7 +27,8 @@ app = Flask(__name__)
 # Apply ProxyFix to handle proxy headers (e.g., X-Forwarded-Proto for HTTPS)
 # Adjust x_for=1, x_proto=1, x_host=1, x_prefix=1 based on your proxy setup if needed.
 # Common defaults are usually sufficient for platforms like Render.
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+# Simplifying to trust only X-Forwarded-Proto
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", os.urandom(24))
@@ -57,8 +58,14 @@ if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
     # You might want to exit or handle this more gracefully in production
     # exit(1)
 
-# This must match the "Authorized redirect URIs" in your Google Cloud Console
-REDIRECT_URI = 'http://127.0.0.1:5000/oauth2callback'
+# Use the production URL env var if available (for deployment), otherwise default to local
+PROD_URL = os.environ.get("PRODUCTION_URL")
+if PROD_URL:
+    REDIRECT_URI = f"{PROD_URL}/oauth2callback"
+else:
+    REDIRECT_URI = 'http://127.0.0.1:5000/oauth2callback'
+
+# print(f"DEBUG: Using Redirect URI: {REDIRECT_URI}") # Add temporary print for verification
 
 # Scopes define the permissions your app requests
 SCOPES = [
