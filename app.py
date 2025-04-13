@@ -241,13 +241,15 @@ def oauth2callback():
         # print(f"Request URL was: {request.url}") # Removed
         # print(f"Expected Redirect URI: {REDIRECT_URI}") # Removed
         # print(f"State from session: {state}") # Removed
-        return redirect(url_for('index'))
+        # Explicitly redirect to root URL in production
+        return redirect(PROD_URL or url_for('index'))
     except InvalidGrantError as e:
         # Specific error for invalid code or other grant issues
         # print(f"--- DEBUG: FATAL ERROR - InvalidGrantError during flow.fetch_token: {e} ---") # Removed
         flash(f"OAuth invalid grant error. The authorization code might be invalid or expired. Please try connecting again. Details: {e}", "error")
         # print(f"Request URL was: {request.url}") # Removed
-        return redirect(url_for('index'))
+        # Explicitly redirect to root URL in production
+        return redirect(PROD_URL or url_for('index'))
     except Exception as e:
         # General exception catch
         # print(f"--- DEBUG: Generic Exception during flow.fetch_token: {type(e).__name__}: {e} ---") # Removed
@@ -256,7 +258,8 @@ def oauth2callback():
         # print(f"Request URL was: {request.url}") # Removed
         # print(f"Expected Redirect URI: {REDIRECT_URI}") # Removed
         # print(f"State used: {state}") # Removed
-        return redirect(url_for('index'))
+        # Explicitly redirect to root URL in production
+        return redirect(PROD_URL or url_for('index'))
 
     # Store credentials in the session.
     # print("--- DEBUG: Storing credentials in session... ---") # Removed
