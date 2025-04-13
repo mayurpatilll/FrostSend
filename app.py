@@ -11,6 +11,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 from googleapiclient.errors import HttpError
 from werkzeug.middleware.proxy_fix import ProxyFix
+from urllib.parse import urlparse
 
 # Google OAuth Libraries
 import google.oauth2.credentials
@@ -72,6 +73,20 @@ else:
 if not PROD_URL:
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
     print("INFO: Running in local development mode with OAUTHLIB_INSECURE_TRANSPORT enabled.")
+else:
+    # Configure SERVER_NAME for production to help url_for generate correct URLs
+    try:
+        parsed_url = urlparse(PROD_URL)
+        # Ensure scheme is included if not present in PRODUCTION_URL
+        # Although Render URLs usually include https
+        if parsed_url.netloc: # Check if parsing was successful
+             app.config['SERVER_NAME'] = parsed_url.netloc # e.g., frostsend.onrender.com
+             app.config['PREFERRED_URL_SCHEME'] = parsed_url.scheme or 'https' # Default to https
+             print(f"INFO: Configured SERVER_NAME='{app.config['SERVER_NAME']}' and PREFERRED_URL_SCHEME='{app.config['PREFERRED_URL_SCHEME']}'")
+        else:
+             print(f"WARNING: Could not parse PRODUCTION_URL ('{PROD_URL}') correctly to set SERVER_NAME.")
+    except Exception as e:
+        print(f"ERROR: Exception while setting SERVER_NAME from PRODUCTION_URL: {e}")
 
 # Scopes define the permissions your app requests
 SCOPES = [
