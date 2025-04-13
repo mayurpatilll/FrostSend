@@ -19,7 +19,7 @@ from googleapiclient.errors import HttpError
 # Allow OAuthlib to work in development (HTTP) without forcing HTTPS
 # Set this early, before any Flow object might be instantiated
 # Remove this or set to '0' in production!
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' # Ensure this is commented out/removed for production
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
