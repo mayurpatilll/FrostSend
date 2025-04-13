@@ -70,10 +70,8 @@ if PROD_URL:
 else:
     REDIRECT_URI = 'http://127.0.0.1:5000/oauth2callback'
 
-# print(f"DEBUG: Using Redirect URI: {REDIRECT_URI}") # Removed
-
 # --- Add print to check PROD_URL at startup ---
-print(f"DEBUG: PROD_URL environment variable = {PROD_URL}")
+# print(f"DEBUG: PROD_URL environment variable = {PROD_URL}") # Removed
 # -------------------------------------------
 
 # Set insecure transport for local development only (when PRODUCTION_URL is not set)
