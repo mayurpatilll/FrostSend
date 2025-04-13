@@ -28,7 +28,8 @@ app = Flask(__name__)
 # Adjust x_for=1, x_proto=1, x_host=1, x_prefix=1 based on your proxy setup if needed.
 # Common defaults are usually sufficient for platforms like Render.
 # Simplifying to trust only X-Forwarded-Proto
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
+# Restoring more comprehensive proxy header trust
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", os.urandom(24))
