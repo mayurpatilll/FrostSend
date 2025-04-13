@@ -83,7 +83,8 @@ else:
              app.config['SERVER_NAME'] = parsed_url.netloc # e.g., frostsend.onrender.com
              app.config['PREFERRED_URL_SCHEME'] = parsed_url.scheme or 'https' # Default to https
              app.config['SESSION_COOKIE_DOMAIN'] = parsed_url.netloc # Set cookie domain
-             print(f"INFO: Configured SERVER_NAME='{app.config['SERVER_NAME']}', PREFERRED_URL_SCHEME='{app.config['PREFERRED_URL_SCHEME']}', SESSION_COOKIE_DOMAIN='{app.config['SESSION_COOKIE_DOMAIN']}'") # Updated print
+             app.config['APPLICATION_ROOT'] = '/' # <<< Add this line
+             print(f"INFO: Configured SERVER_NAME='{app.config.get('SERVER_NAME')}', PREFERRED_URL_SCHEME='{app.config.get('PREFERRED_URL_SCHEME')}', SESSION_COOKIE_DOMAIN='{app.config.get('SESSION_COOKIE_DOMAIN')}', APPLICATION_ROOT='{app.config.get('APPLICATION_ROOT')}'")
         else:
              print(f"WARNING: Could not parse PRODUCTION_URL ('{PROD_URL}') correctly to set SERVER_NAME.")
     except Exception as e:
