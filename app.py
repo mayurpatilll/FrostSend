@@ -9,12 +9,13 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
+from googleapiclient.errors import HttpError
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Google OAuth Libraries
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
-from googleapiclient.errors import HttpError
 
 # Allow OAuthlib to work in development (HTTP) without forcing HTTPS
 # Set this early, before any Flow object might be instantiated
@@ -22,11 +23,24 @@ from googleapiclient.errors import HttpError
 # os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' # Ensure this is commented out/removed for production
 
 app = Flask(__name__)
+
+# Apply ProxyFix to handle proxy headers (e.g., X-Forwarded-Proto for HTTPS)
+# Adjust x_for=1, x_proto=1, x_host=1, x_prefix=1 based on your proxy setup if needed.
+# Common defaults are usually sufficient for platforms like Render.
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", os.urandom(24))
 # --- Debug Secret Key ---
 # print(f"DEBUG: Using Flask Secret Key: {app.secret_key}") # Removed
 # --- End Debug ---
+
+# Production Session Cookie Settings
+app.config.update(
+    SESSION_COOKIE_SECURE=True,    # Send cookie only over HTTPS
+    SESSION_COOKIE_HTTPONLY=True,  # Prevent client-side JS access
+    SESSION_COOKIE_SAMESITE='Lax' # Recommended setting for cross-site request handling
+)
 
 # --- OAuth 2.0 Configuration ---
 # !! Store these as Environment Variables !!
