@@ -167,12 +167,12 @@
                      <div class="space-y-5">
                          <div>
                             <label for="subject" class="form-label">Email Subject</label>
-                            <input type="text" id="subject" name="subject" placeholder="e.g., Application for Software Engineer position at &lcub;&lcub;CompanyName&rcub;&rcub;" required class="form-input">
+                            <input type="text" id="subject" name="subject" value="{{ saved_subject }}" placeholder="e.g., Application for Software Engineer position at &lcub;&lcub;CompanyName&rcub;&rcub;" required class="form-input">
                          </div>
                          <div>
                             <label for="body" class="form-label">Email Body</label>
-                            <textarea id="body" name="body" rows="8" placeholder="e.g., Hi &lcub;&lcub;HR Name&rcub;&rcub;, I hope you're doing well. I'm reaching out to express my interest in potential opportunities at &lcub;&lcub;CompanyName&rcub;&rcub;.........." required class="form-input"></textarea>
-                            <p class="info-text">Placeholders like <code>&lcub;&lcub;FirstName&rcub;&rcub;</code> must match your exact column headers.</p>
+                            <textarea id="body" name="body" rows="8" placeholder="e.g., Hi &lcub;&lcub;HR Name&rcub;&rcub;, I hope you're doing well. I'm reaching out to express my interest in potential opportunities at &lcub;&lcub;CompanyName&rcub;&rcub;.........." required class="form-input">{{ saved_body }}</textarea>
+                            <p class="info-text">Placeholders like <code>&lcub;&lcub;CompanyName&rcub;&rcub;</code> must match your column headers exactly as they appear in your data sheet.</p>
                          </div>
                      </div>
                 </section>

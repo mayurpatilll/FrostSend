@@ -4,6 +4,7 @@ import pandas as pd
 from werkzeug.utils import secure_filename
 import re
 import base64
+import json
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
@@ -92,12 +93,16 @@ def find_placeholders(text):
 def index():
     user_email = None
     if 'credentials' in session:
-        # Optionally, refresh credentials if needed or get email
-        # For simplicity, we assume credentials are valid for the session lifetime
-        # Or we could retrieve email stored at login
         user_email = session.get('user_email')
 
-    return render_template('index.html', user_email=user_email)
+    # Retrieve stored templates from session
+    saved_subject = session.get('saved_subject', '')
+    saved_body = session.get('saved_body', '')
+
+    return render_template('index.html', 
+                           user_email=user_email, 
+                           saved_subject=saved_subject, 
+                           saved_body=saved_body)
 
 @app.route('/authorize')
 def authorize():
@@ -235,6 +240,11 @@ def clear_credentials():
         del session['credentials']
         if 'user_email' in session:
              del session['user_email']
+        # Also clear saved templates
+        if 'saved_subject' in session:
+            del session['saved_subject']
+        if 'saved_body' in session:
+            del session['saved_body']
         flash("Account disconnected.", "info")
     return redirect(url_for('index'))
 
@@ -313,9 +323,12 @@ def send_emails():
          if 'credentials' in session: del session['credentials'] # Clear potentially corrupted credentials
          return redirect(url_for('index'))
 
-    # --- Get form data (excluding sender credentials) ---
+    # --- Get form data ---
     subject_template = request.form['subject']
     body_template = request.form['body']
+    # Store templates in session *before* potential redirects
+    session['saved_subject'] = subject_template
+    session['saved_body'] = body_template
     data_sheet_file = request.files['data_sheet']
     attachment_file = request.files.get('attachment')
 
@@ -340,7 +353,7 @@ def send_emails():
         attachment_path = os.path.join(app.config['UPLOAD_FOLDER'], attachment_filename)
         attachment_file.save(attachment_path)
 
-    # --- Read Data Sheet (Same as before) ---
+    # --- Read Data Sheet ---
     try:
         if data_filename.endswith('.csv'):
             df = pd.read_csv(data_filepath)
@@ -357,7 +370,7 @@ def send_emails():
         if attachment_path: os.remove(attachment_path)
         return redirect(url_for('index'))
 
-    # --- Validate Sheet Columns (Same as before) ---
+    # --- Validate Sheet Columns ---
     if 'Email' not in df.columns:
         flash('Data sheet must contain an \'Email\' column for recipient addresses.', 'error')
         os.remove(data_filepath)
@@ -416,11 +429,25 @@ def send_emails():
                 try:
                     # Use 'me' to refer to the authenticated user
                     sent_message = service.users().messages().send(userId='me', body=message_body).execute()
-                    # print(f"Message Id: {sent_message['id']}") # Optional: Log message ID
                     success_count += 1
                 except HttpError as error:
                     print(f"An API error occurred sending to {recipient_email}: {error}")
-                    error_details.append(f"Recipient {recipient_email}: API Send error - {error}")
+                    error_msg = f"API Send error - {error}" # Default error message
+                    try:
+                        # Attempt to parse the error content for specific details
+                        error_details_json = json.loads(error.content.decode('utf-8'))
+                        if error_details_json.get('error') and error_details_json['error'].get('errors'):
+                            first_error = error_details_json['error']['errors'][0]
+                            if first_error.get('reason') == 'invalidArgument' and 'Invalid To header' in first_error.get('message', ''):
+                                error_msg = f"Invalid Email Address Format."
+                            else:
+                                # Use the message from the API error if available, otherwise default
+                                error_msg = first_error.get('message', error_msg)
+                    except (json.JSONDecodeError, IndexError, KeyError, AttributeError) as parse_error:
+                         print(f"Could not parse specific error details from HttpError: {parse_error}")
+                         # Stick with the default error message
+                    
+                    error_details.append(f"Recipient {recipient_email} (Row {index+2}): {error_msg}")
                     error_count += 1
                 except Exception as e:
                      print(f"Unexpected error sending email to {recipient_email}: {e}")
@@ -473,6 +500,7 @@ def send_emails():
     if error_details:
          flash('Error Details: ' + "; ".join(error_details[:10]) + ('...' if len(error_details) > 10 else ''), 'warning')
 
+    # Redirect happens last, session now contains the templates
     return redirect(url_for('index'))
 
 
