@@ -66,12 +66,25 @@ This application allows users to:
     ```
     *(Replace placeholders with your actual credentials and a generated secret key).*
 
-5.  **Run the application:**
+5.  **Google OAuth Verification Prerequisites (Required for Public Use / Removing Unverified Screen):**
+    *   **Create and Link Privacy Policy:**
+        *   This is **Mandatory** for verification.
+        *   You need a publicly accessible web page explaining how FrostSend handles user data.
+        *   **Content should cover:**
+            *   What data is accessed (permission to send email via user's account, user's email address).
+            *   How data is used (sending emails composed by the user based on their template/sheet).
+            *   How data is stored (OAuth credentials/templates in temporary session, uploaded files deleted after processing).
+            *   A statement that the app adheres to the [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy).
+        *   Host this policy (e.g., GitHub Pages, Google Sites, public Google Doc) and add the URL to the **"Application Privacy Policy link"** field in your Google Cloud OAuth consent screen settings.
+    *   **Link Terms of Service (Optional but Recommended):**
+        *   If you have Terms of Service, add the link in the OAuth consent screen settings. Less critical than the Privacy Policy for basic verification.
+
+6.  **Run the application:**
     ```bash
     python3 app.py
     ```
 
-6.  Access the application in your browser at `http://127.0.0.1:5000`.
+7.  **Access the application in your browser at `http://127.0.0.1:5000`.
 
 ## Usage
 
