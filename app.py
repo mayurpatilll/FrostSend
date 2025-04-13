@@ -38,6 +38,9 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", os.urandom(24))
 # print(f"DEBUG: Using Flask Secret Key: {app.secret_key}") # Removed
 # --- End Debug ---
 
+# Ensure upload folder exists when app starts
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
 # Production Session Cookie Settings
 app.config.update(
     SESSION_COOKIE_SECURE=True,    # Send cookie only over HTTPS
@@ -560,10 +563,11 @@ if __name__ == '__main__':
     # print("--- Runtime Check ---") # Removed
     # print(f"GOOGLE_CLIENT_ID: {os.environ.get('GOOGLE_CLIENT_ID')}") # Removed
     # print(f"GOOGLE_CLIENT_SECRET: {os.environ.get('GOOGLE_CLIENT_SECRET')[:5]}...{os.environ.get('GOOGLE_CLIENT_SECRET')[-5:] if os.environ.get('GOOGLE_CLIENT_SECRET') else None}") # Removed
-    # print(f"FLASK_SECRET_KEY: {os.environ.get('FLASK_SECRET_KEY')}") # Removed
+    print(f"FLASK_SECRET_KEY: {os.environ.get('FLASK_SECRET_KEY')}")
     # print("---------------------") # Removed
 
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    # os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True) # Moved up
+
     # Consider using a more production-ready server than Flask's default dev server
     # For session management, ensure the secret key is properly set and kept secret
     app.run(debug=True, port=5000) # Running on port 5000 
