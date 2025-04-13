@@ -65,7 +65,12 @@ if PROD_URL:
 else:
     REDIRECT_URI = 'http://127.0.0.1:5000/oauth2callback'
 
-# print(f"DEBUG: Using Redirect URI: {REDIRECT_URI}") # Add temporary print for verification
+# print(f"DEBUG: Using Redirect URI: {REDIRECT_URI}") # Removed
+
+# Set insecure transport for local development only (when PRODUCTION_URL is not set)
+if not PROD_URL:
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+    print("INFO: Running in local development mode with OAUTHLIB_INSECURE_TRANSPORT enabled.")
 
 # Scopes define the permissions your app requests
 SCOPES = [
