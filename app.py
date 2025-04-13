@@ -69,6 +69,10 @@ else:
 
 # print(f"DEBUG: Using Redirect URI: {REDIRECT_URI}") # Removed
 
+# --- Add print to check PROD_URL at startup ---
+print(f"DEBUG: PROD_URL environment variable = {PROD_URL}")
+# -------------------------------------------
+
 # Set insecure transport for local development only (when PRODUCTION_URL is not set)
 if not PROD_URL:
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -279,7 +283,8 @@ def oauth2callback():
 
     flash(f"Successfully connected account: {session['user_email']}", "info")
     # print("--- DEBUG: Redirecting to index... ---") # Removed
-    return redirect(url_for('index'))
+    # Force redirect to root URL in production even on success
+    return redirect(PROD_URL or url_for('index'))
 
 @app.route('/clear')
 def clear_credentials():
