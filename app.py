@@ -165,9 +165,10 @@ def authorize():
     # The URI created here must exactly match one of the authorized redirect URIs
     # for the OAuth 2.0 client, which you configured in the Cloud Console.
     flow.redirect_uri = REDIRECT_URI
-    # --- Debug Redirect URI ---
-    # print(f"DEBUG: Authorize using Redirect URI: {flow.redirect_uri}") # Removed
-    # --- End Debug ---
+    # --- Add Debug Print for actual redirect_uri used by flow --- #
+    print(f"--- DEBUG [/authorize]: REDIRECT_URI variable value: {REDIRECT_URI}")
+    print(f"--- DEBUG [/authorize]: flow.redirect_uri is set to: {flow.redirect_uri}")
+    # ------------------------------------------------------------ #
 
     authorization_url, state = flow.authorization_url(
         # Enable offline access so that you can refresh an access token without
@@ -204,8 +205,8 @@ def oauth2callback():
     if not state:
         # print("--- DEBUG: State missing from session! ---") # Removed
         flash("OAuth state missing from session. Please try connecting again.", "error")
-        # Explicitly redirect to root URL in production
-        return redirect(PROD_URL or url_for('index'))
+        # HARDCODED REDIRECT FOR DEBUGGING
+        return redirect("https://frostsend.onrender.com/") 
 
     try:
         # print("--- DEBUG: Creating Flow object... ---") # Removed
@@ -216,7 +217,8 @@ def oauth2callback():
     except Exception as e:
          # print(f"--- DEBUG: Error creating Flow object: {e} ---") # Removed
          flash(f"Error initializing OAuth flow: {e}", "error")
-         return redirect(url_for('index'))
+         # HARDCODED REDIRECT FOR DEBUGGING
+         return redirect("https://frostsend.onrender.com/")
 
     # Use the authorization server's response to fetch the OAuth 2.0 tokens.
     authorization_response = request.url
@@ -243,28 +245,20 @@ def oauth2callback():
         # Specific error for state mismatch
         # print(f"--- DEBUG: FATAL ERROR - MismatchingStateError during flow.fetch_token: {e} ---") # Removed
         flash(f"OAuth state mismatch error. This can happen if the session is invalid or the request was tampered with. Please try connecting again. Details: {e}", "error")
-        # print(f"Request URL was: {request.url}") # Removed
-        # print(f"Expected Redirect URI: {REDIRECT_URI}") # Removed
-        # print(f"State from session: {state}") # Removed
-        # Explicitly redirect to root URL in production
-        return redirect(PROD_URL or url_for('index'))
+        # HARDCODED REDIRECT FOR DEBUGGING
+        return redirect("https://frostsend.onrender.com/")
     except InvalidGrantError as e:
         # Specific error for invalid code or other grant issues
         # print(f"--- DEBUG: FATAL ERROR - InvalidGrantError during flow.fetch_token: {e} ---") # Removed
         flash(f"OAuth invalid grant error. The authorization code might be invalid or expired. Please try connecting again. Details: {e}", "error")
-        # print(f"Request URL was: {request.url}") # Removed
-        # Explicitly redirect to root URL in production
-        return redirect(PROD_URL or url_for('index'))
+        # HARDCODED REDIRECT FOR DEBUGGING
+        return redirect("https://frostsend.onrender.com/")
     except Exception as e:
         # General exception catch
         # print(f"--- DEBUG: Generic Exception during flow.fetch_token: {type(e).__name__}: {e} ---") # Removed
         flash(f"Error fetching OAuth token: {e}. Ensure Redirect URI matches and session is stable.", "error")
-        # print(f"OAuth fetch_token error details: {e}") # Removed
-        # print(f"Request URL was: {request.url}") # Removed
-        # print(f"Expected Redirect URI: {REDIRECT_URI}") # Removed
-        # print(f"State used: {state}") # Removed
-        # Explicitly redirect to root URL in production
-        return redirect(PROD_URL or url_for('index'))
+        # HARDCODED REDIRECT FOR DEBUGGING
+        return redirect("https://frostsend.onrender.com/")
 
     # Store credentials in the session.
     # print("--- DEBUG: Storing credentials in session... ---") # Removed
@@ -283,9 +277,8 @@ def oauth2callback():
     # print(f"--- DEBUG: User email obtained: {session.get('user_email')} ---") # Removed
 
     flash(f"Successfully connected account: {session['user_email']}", "info")
-    # print("--- DEBUG: Redirecting to index... ---") # Removed
-    # Force redirect to root URL in production even on success
-    return redirect(PROD_URL or url_for('index'))
+    # HARDCODED REDIRECT FOR DEBUGGING
+    return redirect("https://frostsend.onrender.com/")
 
 @app.route('/clear')
 def clear_credentials():
